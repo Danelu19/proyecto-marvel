@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orden Cronológico MCU — Guía para Avengers: Doomsday</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    ink: '#14120F',
+                    bone: '#F6F2E9',
+                    surface: '#FFFFFF',
+                    red: '#E63946',
+                    redDeep: '#A11D2A',
+                    blue: '#3FD6FF',
+                    blueDeep: '#0E7FA3',
+                    stone: '#DCD6C6',
+                    stoneDeep: '#8B8677'
+                },
+                fontFamily: {
+                    display: ['"Archivo Black"', 'sans-serif'],
+                    body: ['"Work Sans"', 'sans-serif'],
+                    mono: ['"IBM Plex Mono"', 'monospace']
+                }
+            }
+        }
+    }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Work+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ink: #14120F;
+        --bone: #F6F2E9;
+        --surface: #FFFFFF;
+        --red: #E63946;
+        --red-deep: #A11D2A;
+        --blue: #3FD6FF;
+        --blue-deep: #0E7FA3;
+        --stone: #DCD6C6;
+        --stone-deep: #8B8677;
+    }
+    html, body { background: var(--bone); }
+    body { font-family: 'Work Sans', sans-serif; color: var(--ink); }
+    .font-display { font-family: 'Archivo Black', sans-serif; letter-spacing: -0.01em; }
+    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+
+    /* ---------- Brutalist primitives ---------- */
+    .bz-border { border: 3px solid var(--ink); }
+    .bz-border-thin { border: 2px solid var(--ink); }
+    .bz-shadow { box-shadow: 6px 6px 0 var(--ink); }
+    .bz-shadow-sm { box-shadow: 4px 4px 0 var(--ink); }
+    .bz-shadow-xs { box-shadow: 2.5px 2.5px 0 var(--ink); }
+
+    .bz-card {
+        background: var(--surface);
+        border: 3px solid var(--ink);
+        border-radius: 18px;
+        box-shadow: 6px 6px 0 var(--ink);
+    }
+
+    .bz-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 3px solid var(--ink);
+        border-radius: 12px;
+        background: var(--surface);
+        box-shadow: 4px 4px 0 var(--ink);
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        user-select: none;
+    }
+    .bz-btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+    .bz-btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+    .bz-btn.is-pressed { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); background: var(--ink); color: var(--bone); }
+
+    .bz-icon-btn {
+        width: 48px; height: 48px;
+        display: flex; align-items: center; justify-content: center;
+        border: 3px solid var(--ink);
+        border-radius: 12px;
+        background: var(--surface);
+        box-shadow: 4px 4px 0 var(--ink);
+        cursor: pointer;
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        flex-shrink: 0;
+    }
+    .bz-icon-btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+    .bz-icon-btn:active, .bz-icon-btn.is-active {
+        transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink);
+        background: var(--blue);
+    }
+
+    /* Collection card with folder tab peeking behind */
+    .tab-wrap { position: relative; }
+    .tab-peek {
+        position: absolute;
+        top: -14px; left: 16px; right: 16px;
+        height: 30px;
+        border: 3px solid var(--ink);
+        border-bottom: none;
+        border-radius: 14px 14px 0 0;
+        z-index: 0;
+    }
+    .tab-wrap.rot-l .tab-peek { transform: rotate(-2deg); }
+    .tab-wrap.rot-r .tab-peek { transform: rotate(2deg); }
+    .collection-card {
+        position: relative;
+        z-index: 1;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .collection-card:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
+    .collection-card:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--ink); }
+    .collection-card.is-active { background: var(--ink); }
+    .collection-card.is-active .cc-title,
+    .collection-card.is-active .cc-count { color: var(--bone); }
+
+    .icon-box {
+        width: 54px; height: 54px;
+        border: 3px solid var(--ink);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 3px 3px 0 var(--ink);
+        flex-shrink: 0;
+    }
+
+    /* Custom checkbox */
+    input[type="checkbox"].bz-check {
+        appearance: none; -webkit-appearance: none;
+        width: 24px; height: 24px;
+        border: 2.5px solid var(--ink);
+        border-radius: 6px;
+        background: var(--surface);
+        position: relative;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    input[type="checkbox"].bz-check:checked { background: var(--ink); }
+    input[type="checkbox"].bz-check:checked::after {
+        content: '';
+        position: absolute;
+        left: 7px; top: 2px;
+        width: 6px; height: 12px;
+        border: solid var(--bone);
+        border-width: 0 3px 3px 0;
+        transform: rotate(40deg);
+    }
+
+    .bz-chip {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        padding: 0.2rem 0.55rem;
+        font-weight: 700;
+        font-size: 0.72rem;
+        white-space: nowrap;
+    }
+    .chip-obligatoria { background: var(--red); color: var(--ink); }
+    .chip-recomendada { background: var(--blue); color: var(--ink); }
+    .chip-opcional { background: var(--stone); color: var(--ink); }
+
+    .row-obligatoria { border-left: 6px solid var(--red); }
+    .row-recomendada { border-left: 6px solid var(--blue); }
+    .row-opcional { border-left: 6px solid var(--stone-deep); }
+
+    select.bz-select {
+        appearance: none; -webkit-appearance: none;
+        background-image: none;
+        border: 3px solid var(--ink);
+        border-radius: 10px;
+        background-color: var(--surface);
+        font-weight: 600;
+        box-shadow: 3px 3px 0 var(--ink);
+    }
+
+    .bz-input {
+        border: 3px solid var(--ink);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: 4px 4px 0 var(--ink);
+    }
+    .bz-input:focus { outline: none; }
+
+    .segbar { display: flex; gap: 4px; }
+    .segbar > span {
+        flex: 1; height: 16px;
+        border: 2px solid var(--ink);
+        border-radius: 3px;
+        background: var(--surface);
+    }
+    .segbar > span.filled { background: var(--blue); }
+
+    custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
+    custom-scrollbar::-webkit-scrollbar-track { background: var(--bone); }
+    custom-scrollbar::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 0px; }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 260px;
+    }
+    @media (min-width: 768px) { .chart-container { height: 300px; } }
+
+    ::selection { background: var(--red); color: var(--bone); }
+</style>
+</head>
+<body class="h-full flex flex-col custom-scrollbar">
+
+<!-- Header -->
+<header class="sticky top-0 z-30 bg-bone border-b-[3px] border-ink">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="icon-box bg-red shrink-0">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="var(--ink)"><polygon points="12,1 15,9 23,9 16.5,14 19,22 12,17 5,22 7.5,14 1,9 9,9"/></svg>
+            </div>
+            <div class="min-w-0">
+                <h1 class="font-display text-lg sm:text-xl leading-tight uppercase truncate">Guía Doomsday</h1>
+                <p class="font-mono text-[11px] text-stoneDeep uppercase tracking-wide truncate">Orden cronológico &middot; Multiverso MCU</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button id="filterToggleBtn" onclick="toggleFilterPanel()" title="Filtros" class="bz-icon-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="var(--bone)"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="16" cy="12" r="2" fill="var(--bone)"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="11" cy="18" r="2" fill="var(--bone)"/></svg>
+            </button>
+            <button id="exportCsvBtn" onclick="exportToCSV()" title="Exportar CSV" class="bz-icon-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+            </button>
+            <button id="viewToggleBtn" onclick="switchView()" title="Cambiar vista" class="bz-icon-btn">
+                <svg id="viewToggleIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+    <!-- Hero -->
+    <section>
+        <h2 class="font-display text-4xl sm:text-5xl leading-[0.95] uppercase">
+            Ve en orden.<br>
+            <span class="text-red">Entiende</span> el multiverso.
+        </h2>
+        <p class="mt-4 max-w-2xl text-sm sm:text-base text-ink/80 leading-relaxed">
+            <span id="heroTotalCount">0</span> películas, series, especiales y escenas clave del MCU, Sony, Fox y Netflix,
+            ordenadas cronológicamente y clasificadas por su peso real en <em>Avengers: Doomsday</em>.
+            Filtra, marca lo que ya viste y exporta tu plan.
+        </p>
+    </section>
+
+    <!-- Search row -->
+    <section class="flex gap-3">
+        <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-stoneDeep">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.2" y2="16.2"/></svg>
+            </span>
+            <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Buscar película, serie, personaje o gema del infinito..."
+                class="bz-input w-full pl-12 pr-4 py-3 text-sm placeholder-stoneDeep font-medium">
+        </div>
+        <button onclick="resetFilters()" title="Restablecer filtros" class="bz-icon-btn !w-14 !h-auto bg-blue">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7"/><polyline points="3 16 3 21 8 21"/></svg>
+        </button>
+    </section>
+
+    <!-- Filter panel (collapsible) -->
+    <section id="filterPanel" class="hidden bz-card p-5">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+                <label class="font-mono text-[11px] uppercase tracking-wide text-stoneDeep block mb-1">Relevancia</label>
+                <select id="relevanceFilter" onchange="applyFilters()" class="bz-select w-full py-2 px-3 text-sm">
+                    <option value="ALL">Todas</option>
+                    <option value="Obligatoria">Obligatorias (clave)</option>
+                    <option value="Recomendada">Recomendadas (contexto)</option>
+                    <option value="Opcional">Opcionales (secundario)</option>
+                </select>
+            </div>
+            <div>
+                <label class="font-mono text-[11px] uppercase tracking-wide text-stoneDeep block mb-1">Universo / Fase</label>
+                <select id="universeFilter" onchange="applyFilters()" class="bz-select w-full py-2 px-3 text-sm">
+                    <option value="ALL">Todos</option>
+                    <option value="Fase 1">Fase 1</option>
+                    <option value="Fase 2">Fase 2</option>
+                    <option value="Fase 3">Fase 3</option>
+                    <option value="Fase 4">Fase 4</option>
+                    <option value="Fase 5">Fase 5</option>
+                    <option value="Fase 6">Fase 6</option>
+                    <option value="Multiverso / Fox">Fox (X-Men / Logan)</option>
+                    <option value="Multiverso / Sony">Sony (Spider-Man)</option>
+                    <option value="Defenders / Netflix">Netflix (Daredevil)</option>
+                    <option value="LEGACY">Todo lo Legacy (Fox+Sony+Netflix)</option>
+                </select>
+            </div>
+            <div>
+                <label class="font-mono text-[11px] uppercase tracking-wide text-stoneDeep block mb-1">Tipo</label>
+                <select id="typeFilter" onchange="applyFilters()" class="bz-select w-full py-2 px-3 text-sm">
+                    <option value="ALL">Todos</option>
+                    <option value="Película">Películas</option>
+                    <option value="Serie">Series</option>
+                    <option value="Especial">Especiales</option>
+                    <option value="Escena">Escenas poscréditos</option>
+                    <option value="Películas (Legacy)">Películas Legacy</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collections grid -->
+    <section>
+        <h3 class="font-display text-xl uppercase mb-4">Mis Categorías</h3>
+        <div class="grid grid-cols-2 gap-5 sm:gap-6">
+            <div class="tab-wrap rot-l">
+                <div class="tab-peek" style="background:var(--stone)"></div>
+                <div class="bz-card collection-card p-4 sm:p-5" onclick="setCollectionFilter('ALL','ALL')">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="icon-box bg-stone">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--ink)" stroke-width="2.2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+                        </div>
+                        <span class="font-mono text-xs cc-count" id="colTotal">0 títulos</span>
+                    </div>
+                    <p class="font-display text-base sm:text-lg uppercase cc-title">Todo</p>
+                </div>
+            </div>
+
+            <div class="tab-wrap rot-r">
+                <div class="tab-peek" style="background:var(--red)"></div>
+                <div class="bz-card collection-card p-4 sm:p-5" onclick="setCollectionFilter('Obligatoria','ALL')">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="icon-box bg-red">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="var(--ink)"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>
+                        </div>
+                        <span class="font-mono text-xs cc-count" id="colObligatorias">0 títulos</span>
+                    </div>
+                    <p class="font-display text-base sm:text-lg uppercase cc-title">Obligatorias</p>
+                </div>
+            </div>
+
+            <div class="tab-wrap rot-l">
+                <div class="tab-peek" style="background:var(--blue)"></div>
+                <div class="bz-card collection-card p-4 sm:p-5" onclick="setCollectionFilter('Recomendada','ALL')">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="icon-box bg-blue">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="var(--ink)"><circle cx="12" cy="12" r="9"/></svg>
+                        </div>
+                        <span class="font-mono text-xs cc-count" id="colRecomendadas">0 títulos</span>
+                    </div>
+                    <p class="font-display text-base sm:text-lg uppercase cc-title">Recomendadas</p>
+                </div>
+            </div>
+
+            <div class="tab-wrap rot-r">
+                <div class="tab-peek" style="background:var(--surface)"></div>
+                <div class="bz-card collection-card p-4 sm:p-5" onclick="setCollectionFilter('Opcional','ALL')">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="icon-box bg-surface">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--ink)" stroke-width="2.4"><circle cx="12" cy="12" r="8"/></svg>
+                        </div>
+                        <span class="font-mono text-xs cc-count" id="colOpcionales">0 títulos</span>
+                    </div>
+                    <p class="font-display text-base sm:text-lg uppercase cc-title">Opcionales</p>
+                </div>
+            </div>
+
+            <div class="tab-wrap rot-l">
+                <div class="tab-peek" style="background:var(--red-deep)"></div>
+                <div class="bz-card collection-card p-4 sm:p-5" onclick="setCollectionFilter('ALL','LEGACY')">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="icon-box" style="background:var(--red-deep)">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.2"><rect x="3" y="3" width="12" height="12" rx="2"/><rect x="9" y="9" width="12" height="12" rx="2" fill="var(--bone)"/></svg>
+                        </div>
+                        <span class="font-mono text-xs cc-count" id="colLegacy">0 títulos</span>
+                    </div>
+                    <p class="font-display text-base sm:text-lg uppercase cc-title">Legacy</p>
+                </div>
+            </div>
+
+            <div class="tab-wrap rot-r">
+                <div class="tab-peek" style="background:var(--blue)"></div>
+                <div class="bz-card p-4 sm:p-5">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="font-display text-2xl" id="colProgressPct">0%</span>
+                        <span class="font-mono text-xs text-stoneDeep" id="colProgressCount">0/0</span>
+                    </div>
+                    <div class="segbar mb-3" id="colProgressBar"></div>
+                    <p class="font-display text-base sm:text-lg uppercase">Tu Progreso</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="bz-card p-5">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-display text-lg uppercase">Distribución del Multiverso</h3>
+            <button id="toggleChartsBtn" onclick="toggleCharts()" class="font-mono text-xs uppercase underline decoration-2 underline-offset-4">Ocultar</button>
+        </div>
+        <div id="chartsWrapper" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bz-border rounded-2xl p-4 bz-shadow-sm">
+                <h4 class="font-mono text-xs uppercase tracking-wide text-center mb-2">Por Relevancia</h4>
+                <div class="chart-container"><canvas id="relevanceChart"></canvas></div>
+            </div>
+            <div class="bz-border rounded-2xl p-4 bz-shadow-sm">
+                <h4 class="font-mono text-xs uppercase tracking-wide text-center mb-2">Por Fase / Universo</h4>
+                <div class="chart-container"><canvas id="universeChart"></canvas></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content header -->
+    <section id="contentAnchor" class="flex flex-wrap justify-between items-center gap-3 pt-2">
+        <h3 class="font-display text-xl uppercase">Todas las Producciones</h3>
+        <span class="font-mono text-xs text-stoneDeep">Mostrando <strong id="visibleCount" class="text-ink">0</strong> de <span id="totalCount">0</span></span>
+    </section>
+
+    <!-- Table view -->
+    <section id="tableViewSection" class="bz-card overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead class="font-mono uppercase tracking-wide text-xs border-b-[3px] border-ink">
+                    <tr>
+                        <th class="py-3 px-3 text-center w-14">Visto</th>
+                        <th class="py-3 px-3 text-center w-16">#</th>
+                        <th class="py-3 px-4">Título</th>
+                        <th class="py-3 px-3">Tipo</th>
+                        <th class="py-3 px-3">Fase / Universo</th>
+                        <th class="py-3 px-4">Relevancia</th>
+                        <th class="py-3 px-4">Importancia</th>
+                        <th class="py-3 px-3 text-center">Detalle</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="divide-y-2 divide-ink/10"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Cards view -->
+    <section id="cardsViewSection" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></section>
+
+    <!-- Exclusions note -->
+    <section class="bz-card p-5">
+        <h3 class="font-display text-base uppercase mb-2">Fuera de esta guía</h3>
+        <p class="text-sm leading-relaxed mb-2">
+            Series y adaptaciones que Marvel Studios no considera parte del orden oficial del universo, por
+            problemas de continuidad con el canon o por ubicación poco clara. La mayoría fueron producidas
+            por Netflix antes de que Marvel Studios retomara el control creativo:
+        </p>
+        <p class="font-mono text-xs text-stoneDeep leading-relaxed">
+            Agentes de SHIELD &middot; Agente Carter &middot; Jessica Jones &middot; Iron Fist &middot; Luke Cage &middot; Defenders
+        </p>
+    </section>
+
+</main>
+
+<!-- Modal -->
+<div id="detailModal" class="fixed inset-0 bg-ink/70 z-50 hidden flex items-center justify-center p-4">
+    <div class="bz-card max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <button onclick="closeModal()" class="absolute top-4 right-4 bz-icon-btn !w-10 !h-10 bg-red">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+        </button>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="border-t-[3px] border-ink py-6 text-center mt-8">
+    <div class="max-w-7xl mx-auto px-4 font-mono text-xs text-stoneDeep uppercase tracking-wide space-y-1">
+        <p>Guía interactiva de preparación para Avengers: Doomsday</p>
+        <p>Marvel, personajes y logotipos pertenecen a Marvel Studios y The Walt Disney Company</p>
+    </div>
+</footer>
+
+<script>
+    const mcuData = [
+        { crono: 1, titulo: "Iron Man", tipo: "Película", universo: "Fase 1 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Inicia el MCU. Establece la tecnología Stark, el legado de Tony Stark y la Iniciativa Vengadores.",
+          detalle: "Esencial debido a la relevancia del actor Robert Downey Jr., quien interpreta a Victor Von Doom en Doomsday. Ver el origen de Tony Stark es narrativamente vital para entender el contraste emocional del personaje." },
+        { crono: 2, titulo: "El increíble Hulk", tipo: "Película", universo: "Fase 1 / MCU Principal", relevancia: "Opcional",
+          resumen: "Establece a Bruce Banner/Hulk e introduce al General Ross.",
+          detalle: "Aporta trasfondo sobre el General Ross (posteriormente Presidente y Red Hulk), pero no es imprescindible para entender la trama del multiverso o Doomsday." },
+        { crono: 3, titulo: "Iron Man 2", tipo: "Película", universo: "Fase 1 / MCU Principal", relevancia: "Opcional",
+          resumen: "Introduce a Natasha Romanoff (Viuda Negra) y expande las armaduras de Stark.",
+          detalle: "Introduce la tecnología militar de Rhodey (War Machine) y la integración formal de S.H.I.E.L.D. en la vida de Stark." },
+        { crono: 4, titulo: "Thor", tipo: "Película", universo: "Fase 1 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Introduce Asgard, el reino místico, los Nueve Reinos y a Loki.",
+          detalle: "Abre las puertas de la cosmología del MCU y presenta a Loki, cuya evolución posterior será la columna vertebral del multiverso en Doomsday." },
+        { crono: 5, titulo: "Capitán América: El primer vengador", tipo: "Película", universo: "Fase 1 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Introduce la Gema del Espacio (Teseracto), el origen de Hydra y el suero del súper soldado que cimentará la era de los héroes.",
+          detalle: "Película clave para entender la creación de los Vengadores y el origen de las Gemas del Infinito. Además, establece el trasfondo histórico de Steve Rogers y Bucky Barnes, componentes fundamentales para Doomsday." },
+        { crono: 6, titulo: "Los Vengadores", tipo: "Película", universo: "Fase 1 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Primera gran reunión de héroes, la invasión a Nueva York y la Gema de la Mente (Cetro).",
+          detalle: "Punto de inflexión donde la Tierra descubre que no está sola en el universo. Introduce el cetro con la Gema de la Mente y la primera aparición de Thanos." },
+        { crono: 7, titulo: "Escena poscréditos de Los Vengadores: Thanos", tipo: "Escena", universo: "Fase 1 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Thanos sonríe directo a cámara al enterarse del fracaso de Loki, revelando por primera vez al villano que buscará las Gemas del Infinito.",
+          detalle: "Primera aparición visual de Thanos en el MCU. Sin este instante no se entiende por qué el Titán Loco se convierte en la amenaza central de la Saga del Infinito." },
+        { crono: 8, titulo: "Iron Man 3", tipo: "Película", universo: "Fase 2 / MCU Principal", relevancia: "Opcional",
+          resumen: "Muestra las secuelas traumáticas de Tony Stark tras la batalla de Nueva York.",
+          detalle: "Explora la psicología de Tony Stark y su obsesión con crear un escudo protector alrededor del mundo." },
+        { crono: 9, titulo: "Thor: El mundo oscuro", tipo: "Película", universo: "Fase 2 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Introduce la Gema de la Realidad (Éter) y profundiza en las reliquias universales.",
+          detalle: "Crucial para comprender la naturaleza física de las Gemas del Infinito y la alteración de la realidad que más tarde usará el Doctor Doom o Thanos." },
+        { crono: 10, titulo: "Capitán América: El soldado de invierno", tipo: "Película", universo: "Fase 2 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Revela la infiltración de Hydra en S.H.I.E.L.D., transformando el mapa político mundial.",
+          detalle: "Cambia la dinámica geopolítica del MCU e introduce a Sam Wilson (quien será el nuevo Capitán América en Doomsday)." },
+        { crono: 11, titulo: "Guardianes de la Galaxia", tipo: "Película", universo: "Fase 2 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Introduce la Gema del Poder (Orbe), el espacio profundo y la explicación formal del origen de las Gemas.",
+          detalle: "Explicación magistral del Coleccionista sobre la creación del universo y el origen de los artefactos primordiales." },
+        { crono: 12, titulo: "Vengadores: La era de Ultrón", tipo: "Película", universo: "Fase 2 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Nacimiento de Visión, creación de Ultrón e introducción de Wanda Maximoff.",
+          detalle: "Película profética que anticipa la destrucción del equipo, presenta la magia del caos de Wanda y la visión de Stark sobre la caída de los Vengadores." },
+        { crono: 13, titulo: "Ant-Man", tipo: "Película", universo: "Fase 2 / MCU Principal", relevancia: "Opcional",
+          resumen: "Introduce las Partículas Pym y la existencia del Reino Cuántico.",
+          detalle: "Esencial para las bases físicas de los viajes en el tiempo y saltos dimensionales desarrollados más adelante." },
+        { crono: 14, titulo: "Capitán América: Civil War", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Fractura a los Vengadores, introduce los Acuerdos de Sokovia, a Black Panther y Spider-Man.",
+          detalle: "Deja a la Tierra desprotegida y dividida. Sin este quiebre, el destino del universo ante Thanos y Doomsday habría sido muy diferente." },
+        { crono: 15, titulo: "Doctor Strange", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Introduce las Artes Místicas, el Ojo de Agamotto (Gema del Tiempo) y la Dimensión Oscura.",
+          detalle: "Doctor Strange es uno de los pilares del Multiverso. Introduce el concepto de realidades paralelas y bucles temporales." },
+        { crono: 16, titulo: "Guardianes de la Galaxia Vol. 2", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Opcional",
+          resumen: "Profundiza en la biología de los Celestiales (Ego el Planeta Viviente).",
+          detalle: "Proporciona contexto sobre entes de nivel cósmico y la energía celestial que domina el universo." },
+        { crono: 17, titulo: "Yo Soy Groot", tipo: "Serie", universo: "Fase 3 / MCU Principal", relevancia: "Opcional",
+          resumen: "Cortometrajes cómicos centrados en Groot bebé entre Vol. 2 y Vol. 3, sin peso narrativo real en la trama principal.",
+          detalle: "Contenido ligero de relleno; Marvel Studios lo considera canon, aunque James Gunn ha bromeado con que no afecta la continuidad seria del multiverso." },
+        { crono: 18, titulo: "Thor: Ragnarok", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Destrucción de Asgard y enlace inmediato con el inicio de Infinity War.",
+          detalle: "Remueve las armas principales de Thor, destruye su reino y deja al pueblo asgardiano vulnerable en el espacio." },
+        { crono: 19, titulo: "Spider-Man: Homecoming", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Opcional",
+          resumen: "Desarrolla el vínculo de mentoría entre Tony Stark y Peter Parker.",
+          detalle: "Aporta profundidad emocional a la figura de Tony Stark y su impacto en la nueva generación de héroes." },
+        { crono: 20, titulo: "Black Panther", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Opcional",
+          resumen: "Presenta la nación de Wakanda y su tecnología basada en Vibranium.",
+          detalle: "Establece la potencia tecnológica de Wakanda que servirá como frente de batalla principal en futuras invasiones." },
+        { crono: 21, titulo: "Vengadores: Infinity War", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Thanos reúne las 6 Gemas del Infinito y elimina al 50% de las criaturas vivas.",
+          detalle: "El evento cumbre de la Saga del Infinito. Demuestra las consecuencias nefastas cuando los héroes luchan desunidos." },
+        { crono: 22, titulo: "Ant-Man y la Avispa", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Opcional",
+          resumen: "Muestra el rescate en el Reino Cuántico y la escena del chasquido.",
+          detalle: "Conecta el Reino Cuántico como un vórtice fuera del espacio-tiempo convencional." },
+        { crono: 23, titulo: "Escena poscréditos de Ant-Man y la Avispa", tipo: "Escena", universo: "Fase 3 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Hank Pym, Janet y Hope se desintegran ante los ojos de Scott Lang mientras él queda atrapado en el Reino Cuántico durante el Chasquido de Thanos.",
+          detalle: "Explica por qué Scott sigue con vida durante los cinco años del Blip y por qué el Reino Cuántico se vuelve la vía de escape temporal en Endgame." },
+        { crono: 24, titulo: "Capitana Marvel", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Recomendada",
+          resumen: "Introduce a Carol Danvers, el Teseracto en la década de 1990 y la geopolítica entre Skrulls y Kree.",
+          detalle: "Contextualiza la fuerza de nivel cósmico de Carol Danvers y cómo S.H.I.E.L.D. comenzó a monitorear amenazas extraterrestres." },
+        { crono: 25, titulo: "Escena poscréditos de Capitana Marvel", tipo: "Escena", universo: "Fase 3 / MCU Principal", relevancia: "Opcional",
+          resumen: "Los Vengadores descubren el buscapersonas de Fury con el símbolo de Carol Danvers, justo cuando este deja de funcionar tras el Chasquido.",
+          detalle: "Puente narrativo menor que conecta directamente con la escena de apertura de Endgame; no aporta información nueva sobre el multiverso." },
+        { crono: 26, titulo: "Vengadores: Endgame", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Atraco en el tiempo por el Reino Cuántico, sacrificio de Tony Stark y restauración del universo.",
+          detalle: "Al viajar por el tiempo, los Vengadores abrieron ramas temporales alteradas, detonando la inestabilidad multiversal que conducirá a las incursiones." },
+        { crono: 27, titulo: "Spider-Man: Lejos de casa", tipo: "Película", universo: "Fase 3 / MCU Principal", relevancia: "Opcional",
+          resumen: "Muestra el mundo post-Endgame y el engaño de Mysterio sobre el supuesto 'multiverso'.",
+          detalle: "Sirve como epílogo de la Fase 3 y plantea la fascinación de la gente común por la idea de universos paralelos." },
+        { crono: 28, titulo: "WandaVision (Bruja Escarlata y Visión)", tipo: "Serie", universo: "Fase 4 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Transformación de Wanda en la Bruja Escarlata y posesión del Darkhold.",
+          detalle: "Establece la magia del caos, capaz de alterar la trama de la realidad misma y preparar el camino para el quiebre multiversal." },
+        { crono: 29, titulo: "Falcon y el Soldado de Invierno", tipo: "Serie", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Sam Wilson asume oficialmente el manto del Capitán América.",
+          detalle: "Explora las consecuencias geopolíticas del Blip y el estatus del suero del súper soldado en el mundo moderno." },
+        { crono: 30, titulo: "Loki (Temporada 1)", tipo: "Serie", universo: "Fase 4 / Multiverso", relevancia: "Obligatoria",
+          resumen: "Introduce la Sagrada Línea Temporal, la TAV (Autoridad de Variación Temporal) y las variantes.",
+          detalle: "CRUCIAL. Muestra la muerte de 'Aquel que Permanece' y la liberación incontrolada del Multiverso con infinitas líneas de tiempo interconectadas." },
+        { crono: 31, titulo: "¿Qué pasaría si...?", tipo: "Serie", universo: "Fase 4 / Multiverso", relevancia: "Opcional",
+          resumen: "Antología animada que explora líneas temporales alternativas vigiladas por el Vigilante, sin relación argumental directa con la trama principal.",
+          detalle: "Introduce conceptualmente la idea de infinitos universos y variantes, pero Marvel Studios la mantiene como una rama separada sin impacto directo confirmado en Doomsday." },
+        { crono: 32, titulo: "Viuda Negra", tipo: "Película", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Muestra la historia de Natasha entre Civil War e Infinity War e introduce a Yelena Belova.",
+          detalle: "Da trasfondo a Yelena Belova y los componentes del programa de Viudas Negras previo a los Thunderbolts." },
+        { crono: 33, titulo: "Shang-Chi y la leyenda de los Diez Anillos", tipo: "Película", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Presenta los Diez Anillos y su señal baliza emitida hacia el espacio místico.",
+          detalle: "Los Diez Anillos responden a una frecuencia antigua que podría estar vinculada con tecnología multiversal o con el Reino Cuántico." },
+        { crono: 34, titulo: "Eternals", tipo: "Película", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Presenta a los seres inmortales creados por los Celestiales y la petrificación de Tiamut.",
+          detalle: "Muestra el origen cosmogónico del universo y la estructura viva de los Celestiales." },
+        { crono: 35, titulo: "Ojo de Halcón", tipo: "Serie", universo: "Fase 4 / MCU Principal", relevancia: "Recomendada",
+          resumen: "Clint Barton entrena a Kate Bishop mientras enfrenta a la Ronin del pasado y a la organización criminal de Kingpin (Wilson Fisk) en Nueva York.",
+          detalle: "Primera aparición de Kingpin en el MCU, pieza clave para entender su ascenso político mostrado luego en Echo y Daredevil: Born Again." },
+        { crono: 36, titulo: "Trilogía de Spider-Man (Tobey Maguire)", tipo: "Películas (Legacy)", universo: "Multiverso / Sony", relevancia: "Recomendada",
+          resumen: "Saga clásica de Peter Parker (2002-2007). Directamente conectada con No Way Home y el Multiverso.",
+          detalle: "Recomendada para comprender el valor emocional y las variantes de Spider-Man que cruzan al MCU." },
+        { crono: 37, titulo: "Duología The Amazing Spider-Man (Andrew Garfield)", tipo: "Películas (Legacy)", universo: "Multiverso / Sony", relevancia: "Recomendada",
+          resumen: "Saga de Peter Parker (2012-2014) con Electro y el Duende Verde.",
+          detalle: "Contexto indispensable para las variantes presentadas en el evento de cruce dimensional de No Way Home." },
+        { crono: 38, titulo: "Spider-Man: No Way Home", tipo: "Película", universo: "Fase 4 / Multiverso", relevancia: "Obligatoria",
+          resumen: "Hechizo fallido de Strange que fractura el tejido de las realidades trayendo personajes de Sony.",
+          detalle: "Primera manifestación física directa del choque entre franquicias (Sony y MCU) dentro de la continuidad oficial." },
+        { crono: 39, titulo: "Doctor Strange en el multiverso de la locura", tipo: "Película", universo: "Fase 4 / Multiverso", relevancia: "Obligatoria",
+          resumen: "Explica las INCURSIONES (colisión y destrucción de dos universos), los Illuminati y el libro Darkhold.",
+          detalle: "ABSOLUTAMENTE OBLIGATORIA. Define el concepto exacto de 'Incursión', la amenaza que Doctor Doom intentará solucionar en Doomsday." },
+        { crono: 40, titulo: "Caballero Luna", tipo: "Serie", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Mitología egipcia y deidades sobrenaturales.",
+          detalle: "Explora la dimensión mística de los avatares divinos en el mundo terrenal." },
+        { crono: 41, titulo: "Ms. Marvel", tipo: "Serie", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Introduce a Kamala Khan, los brazaletes cuánticos e hibridación mutante.",
+          detalle: "Los brazaletes antiguos poseen un vínculo directo con las Incursiones y portales dimensionales." },
+        { crono: 42, titulo: "Thor: Love and Thunder", tipo: "Película", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Thor se enfrenta a Gorr y viaja al reino de Eternidad.",
+          detalle: "Muestra la existencia del ente cósmico Eternidad, capaz de conceder cualquier deseo cósmico." },
+        { crono: 43, titulo: "She-Hulk: Abogada Hulka", tipo: "Serie", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Comedia legal que rompe la cuarta pared e introduce a Skaar.",
+          detalle: "Muestra el lado legal de las consecuencias superheróicas y el regreso de Daredevil." },
+        { crono: 44, titulo: "Especial Felices Fiestas de Guardianes de la Galaxia", tipo: "Especial", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Los Guardianes intentan darle a Peter Quill el mejor regalo de Navidad secuestrando a Kevin Bacon en la Tierra.",
+          detalle: "Especial navideño autocontenido sin consecuencias en la trama del multiverso ni en Doomsday." },
+        { crono: 45, titulo: "Werewolf by Night", tipo: "Especial", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Un grupo de cazamonstruos compite por el manto del 'Caballero de la Medianoche' en una mansión gótica, presentando a Man-Thing y a Jack Russell.",
+          detalle: "Expande el costado más oscuro y mágico del MCU, terreno que podría cobrar relevancia en futuras incursiones místicas, aunque hoy no tiene conexión directa confirmada." },
+        { crono: 46, titulo: "Black Panther: Wakanda por siempre", tipo: "Película", universo: "Fase 4 / MCU Principal", relevancia: "Opcional",
+          resumen: "Muerte de T'Challa, ascenso de Shuri y conflicto geopolítico con Namor por el Vibranium.",
+          detalle: "Sienta las bases de la guerra global por recursos extraordinarios previa al Adamantium." },
+        { crono: 47, titulo: "Ant-Man y la Avispa: Quantumania", tipo: "Película", universo: "Fase 5 / MCU Principal", relevancia: "Obligatoria",
+          resumen: "Exploración del Reino Cuántico y combate con Kang el Conquistador.",
+          detalle: "Demuestra la amenaza de las variantes y la tecnología temporal que rige la estabilidad del espacio." },
+        { crono: 48, titulo: "Guardianes de la Galaxia Vol. 3", tipo: "Película", universo: "Fase 5 / MCU Principal", relevancia: "Opcional",
+          resumen: "Cierre de la alineación original de Guardianes y origen de Rocket.",
+          detalle: "Muestra el Alto Evolucionador y la manipulación genética a escala planetaria." },
+        { crono: 49, titulo: "Invasión secreta", tipo: "Serie", universo: "Fase 5 / MCU Principal", relevancia: "Opcional",
+          resumen: "Infiltración Skrull en las cúpulas del poder de la Tierra.",
+          detalle: "Trama de espionaje sobre la desconfianza gubernamental en los superhéroes." },
+        { crono: 50, titulo: "Loki (Temporada 2)", tipo: "Serie", universo: "Fase 5 / Multiverso", relevancia: "Obligatoria",
+          resumen: "Loki sostiene físicamente el Árbol del Tiempo Multiversal (Yggdrasil), convirtiéndose en el Dios de las Historias.",
+          detalle: "IMPRESCINDIBLE. Reemplaza el Telar Temporal para salvar a todas las realidades. Sin esta serie es imposible entender la estructura del Multiverso en Doomsday." },
+        { crono: 51, titulo: "The Marvels", tipo: "Película", universo: "Fase 5 / Multiverso", relevancia: "Recomendada",
+          resumen: "Colapso de puntos de salto espacial y apertura de una brecha al universo de los X-Men.",
+          detalle: "Muestra explícitamente cómo se abre un portal al universo de los X-Men (donde aparece Beast/Monica Rambeau)." },
+        { crono: 52, titulo: "Daredevil (Serie Netflix Temporadas 1-3)", tipo: "Serie", universo: "Defenders / Netflix", relevancia: "Recomendada",
+          resumen: "Historia urbana de Matt Murdock / Daredevil y Kingpin integrados formalmente al MCU.",
+          detalle: "Proporciona el trasfondo de los héroes callejeros que cobran relevancia en la reestructuración de Nueva York. Marvel Studios la sitúa fuera de su canon estricto, pero su impacto se siente en Hawkeye, Echo y Daredevil: Born Again." },
+        { crono: 53, titulo: "Echo", tipo: "Serie", universo: "Fase 5 / MCU Principal", relevancia: "Opcional",
+          resumen: "Historia de origen de Maya Lopez y ascenso político de Kingpin en Nueva York.",
+          detalle: "Prepara la campaña de Kingpin para la alcaldía de Nueva York." },
+        { crono: 54, titulo: "Trilogía Original X-Men (2000-2006)", tipo: "Películas (Legacy)", universo: "Multiverso / Fox", relevancia: "Recomendada",
+          resumen: "Establece a Charles Xavier, Magneto, Lobezno y los mutantes de Fox.",
+          detalle: "Muy recomendada para entender las realidades mutantes que se están fusionando con el MCU en la saga del Multiverso." },
+        { crono: 55, titulo: "X-Men: Primera generación & Días del futuro pasado", tipo: "Películas (Legacy)", universo: "Multiverso / Fox", relevancia: "Recomendada",
+          resumen: "Viajes en el tiempo y reescritura de líneas temporales de los mutantes.",
+          detalle: "Establece las reglas de viajes temporales de Fox que colisionan con las de la TAV." },
+        { crono: 56, titulo: "Logan", tipo: "Película (Legacy)", universo: "Multiverso / Fox", relevancia: "Opcional",
+          resumen: "El futuro desgarrador de Lobezno y el concepto de 'Ancla Temporal'.",
+          detalle: "Muestra el destino final del universo de Fox y sirve como pivote dramático para Deadpool y Lobezno." },
+        { crono: 57, titulo: "Deadpool y Lobezno", tipo: "Película", universo: "Fase 5 / Multiverso", relevancia: "Obligatoria",
+          resumen: "Conexión directa entre el Universo Fox (Earth-10005), la TAV y el MCU Principal.",
+          detalle: "CLAVE ABSOLUTA. Introduce el 'Ancla Temporal', el Vacío multiversal y cómo los universos mueren al colapsar sus héroes guía." },
+        { crono: 58, titulo: "Agatha, ¿quién si no?", tipo: "Serie", universo: "Fase 5 / MCU Principal", relevancia: "Opcional",
+          resumen: "El Camino de las Brujas, el destino de Billy Maximoff (Wiccan) y la magia mística.",
+          detalle: "Explora la reencarnación de los hijos de Wanda Maximoff y el legado del caos." },
+        { crono: 59, titulo: "Capitán América: Brave New World", tipo: "Película", universo: "Fase 5 / MCU Principal", relevancia: "Recomendada",
+          resumen: "Sam Wilson como Capitán América, Red Hulk y el descubrimiento del Adamantium en Tiamut.",
+          detalle: "Establece el nuevo orden mundial y la lucha global por el metal súper-resistente Adamantium previo a Doomsday." },
+        { crono: 60, titulo: "Daredevil: Born Again (Temporada 1)", tipo: "Serie", universo: "Fase 6 / MCU Principal", relevancia: "Recomendada",
+          resumen: "Matt Murdock retoma el manto de Daredevil mientras Wilson Fisk asume la alcaldía de Nueva York, endureciendo la vigilancia sobre los héroes enmascarados.",
+          detalle: "Continúa directamente el arco de Kingpin iniciado en Hawkeye y Echo, mostrando cómo el poder político y criminal se entrelazan justo antes de Doomsday." },
+        { crono: 61, titulo: "Ironheart", tipo: "Serie", universo: "Fase 6 / MCU Principal", relevancia: "Recomendada",
+          resumen: "Riri Williams perfecciona su propia armadura tras conocer a Tony Stark en Wakanda por Siempre, cruzándose con magia urbana y el Kingpin de Nueva York.",
+          detalle: "Consolida a la nueva generación de genios tecnológicos del MCU justo antes de que Los 4 Fantásticos y Doomsday pongan la tecnología al centro del conflicto." },
+        { crono: 62, titulo: "Thunderbolts*", tipo: "Película", universo: "Fase 6 / MCU Principal", relevancia: "Recomendada",
+          resumen: "Equipo de antihéroes al servicio de Valentina Allegra de Fontaine.",
+          detalle: "Muestra la fuerza operativa del gobierno estadounidense en ausencia de un equipo formal de Vengadores." },
+        { crono: 63, titulo: "Los 4 Fantásticos: Primeros pasos", tipo: "Película", universo: "Fase 6 / Multiverso", relevancia: "Obligatoria",
+          resumen: "Reed Richards, Sue Storm, Johnny Storm y Ben Grimm llegan al MCU desde una realidad retrofuturista (Tierra-828) tras un accidente con radiación cósmica.",
+          detalle: "OBLIGATORIA. Introduce al equipo que protagoniza junto a los Vengadores el enfrentamiento contra Victor Von Doom, y a la Tierra-828 como pieza clave de las Incursiones." },
+        { crono: 64, titulo: "Wonder Man", tipo: "Serie", universo: "Fase 6 / MCU Principal", relevancia: "Opcional",
+          resumen: "Simon Williams, doble de riesgo en Hollywood, hereda poderes ligados a la Iónica mientras Marvel Studios satiriza su propia industria del entretenimiento.",
+          detalle: "Serie de tono ligero con mínima injerencia directa en la trama multiversal de Doomsday." },
+        { crono: 65, titulo: "Marvel Zombies", tipo: "Serie", universo: "Fase 6 / MCU Principal", relevancia: "Opcional",
+          resumen: "Una realidad alterna donde un virus zombi arrasa con los héroes del MCU, sin relación argumental directa con la línea principal.",
+          detalle: "Spin-off de universo alterno pensado como entretenimiento autónomo; no impacta la Línea Temporal Sagrada ni las Incursiones." },
+        { crono: 66, titulo: "Daredevil: Born Again (Temporada 2)", tipo: "Serie", universo: "Fase 6 / MCU Principal", relevancia: "Opcional",
+          resumen: "Segunda temporada que profundiza el enfrentamiento entre Daredevil y Kingpin en Nueva York.",
+          detalle: "Aún sin detalles oficiales de trama; se espera que mantenga el tono callejero de la primera temporada sin cruces directos confirmados con Doomsday." },
+        { crono: 67, titulo: "Spider-Man: Brand New Day", tipo: "Película", universo: "Fase 6 / MCU Principal", relevancia: "Recomendada",
+          resumen: "Peter Parker reconstruye su vida e identidad tras el hechizo que borró su recuerdo del mundo en No Way Home.",
+          detalle: "Sitúa a Spider-Man de cara a los eventos de Doomsday con una identidad secreta nuevamente protegida. Estreno: 31 de julio de 2026." },
+        { crono: 68, titulo: "VisionQuest", tipo: "Serie", universo: "Fase 6 / Multiverso", relevancia: "Recomendada",
+          resumen: "White Vision, reconstruido por S.W.O.R.D. al final de WandaVision, busca recuperar su humanidad y sus recuerdos originales.",
+          detalle: "Podría profundizar en el manejo de la percepción de la realidad, tema central de las tramas multiversales que rodean a Doomsday. Estreno: 14 de octubre de 2026." },
+        { crono: 69, titulo: "Vengadores: Doomsday", tipo: "Película", universo: "Fase 6 / Multiverso", relevancia: "Obligatoria",
+          resumen: "Un equipo alternativo de héroes —incluidos los X-Men, los 4 Fantásticos y variantes de los Vengadores— se enfrenta a Victor Von Doom, quien amenaza con colapsar el multiverso entero.",
+          detalle: "EL EVENTO hacia el que apunta toda esta guía: reúne las consecuencias de las Incursiones (Multiverso de la Locura), el Ancla Temporal (Deadpool y Lobezno) y el Árbol del Tiempo (Loki T2). Estreno: 18 de diciembre de 2026." },
+        { crono: 70, titulo: "Vengadores: Secret Wars", tipo: "Película", universo: "Fase 6 / Multiverso", relevancia: "Opcional",
+          resumen: "Secuela directa de Doomsday centrada en la reconstrucción (o colisión final) del multiverso.",
+          detalle: "Estrena después de Doomsday (17 de diciembre de 2027); se incluye aquí solo como referencia del roadmap completo de la Fase 6, no es necesario verla antes del estreno." },
+        { crono: 71, titulo: "Armor Wars", tipo: "Serie", universo: "Fase 6 / MCU Principal", relevancia: "Opcional",
+          resumen: "La tecnología de Iron Man cae en manos equivocadas, obligando a sus herederos tecnológicos a contener el daño.",
+          detalle: "Sin fecha confirmada; estrena después de Doomsday, incluida aquí solo por completitud del roadmap." },
+        { crono: 72, titulo: "Black Panther 3", tipo: "Película", universo: "Fase 6 / MCU Principal", relevancia: "Opcional",
+          resumen: "Continuación de la saga de Wakanda tras Wakanda por Siempre.",
+          detalle: "Estrena después de Doomsday (18 de diciembre de 2028); sin sinopsis oficial confirmada aún." },
+        { crono: 73, titulo: "Ghost Rider", tipo: "Película", universo: "Fase 6 / MCU Principal", relevancia: "Opcional",
+          resumen: "Primera película en solitario de Ghost Rider dentro del MCU.",
+          detalle: "Estrena después de Doomsday (2028); personaje nuevo sin conexión multiversal confirmada todavía." }
+    ];
+
+    let watchedItems = JSON.parse(localStorage.getItem('mcu_watched_items') || '[]');
+    let currentView = 'table';
+    let chartInstances = {};
+
+    const tableBody = document.getElementById('tableBody');
+    const cardsViewSection = document.getElementById('cardsViewSection');
+    const searchInput = document.getElementById('searchInput');
+    const relevanceFilter = document.getElementById('relevanceFilter');
+    const universeFilter = document.getElementById('universeFilter');
+    const typeFilter = document.getElementById('typeFilter');
+
+    const ICON_BOLT = `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>`;
+    const ICON_DOT = `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>`;
+    const ICON_RING = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="8"/></svg>`;
+    const ICON_ARROW = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="18" y2="12"/><polyline points="12 6 18 12 12 18"/></svg>`;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('heroTotalCount').textContent = mcuData.length;
+        renderData();
+        updateCollectionCounts();
+        initCharts();
+    });
+
+    function getFilteredData() {
+        const searchVal = searchInput.value.toLowerCase().trim();
+        const relVal = relevanceFilter.value;
+        const uniVal = universeFilter.value;
+        const typeVal = typeFilter.value;
+
+        return mcuData.filter(item => {
+            const matchesSearch = item.titulo.toLowerCase().includes(searchVal) ||
+                                  item.resumen.toLowerCase().includes(searchVal) ||
+                                  item.universo.toLowerCase().includes(searchVal);
+            const matchesRel = (relVal === 'ALL') || (item.relevancia === relVal);
+            let matchesUni;
+            if (uniVal === 'ALL') matchesUni = true;
+            else if (uniVal === 'LEGACY') matchesUni = /Fox|Sony|Defenders/.test(item.universo);
+            else matchesUni = item.universo.includes(uniVal);
+            const matchesType = (typeVal === 'ALL') || (item.tipo === typeVal);
+            return matchesSearch && matchesRel && matchesUni && matchesType;
+        });
+    }
+
+    function badgeClass(rel) {
+        if (rel === 'Obligatoria') return 'chip-obligatoria';
+        if (rel === 'Recomendada') return 'chip-recomendada';
+        return 'chip-opcional';
+    }
+    function badgeIcon(rel) {
+        if (rel === 'Obligatoria') return ICON_BOLT;
+        if (rel === 'Recomendada') return ICON_DOT;
+        return ICON_RING;
+    }
+    function rowBorderClass(rel) {
+        if (rel === 'Obligatoria') return 'row-obligatoria';
+        if (rel === 'Recomendada') return 'row-recomendada';
+        return 'row-opcional';
+    }
+
+    function renderData() {
+        const filtered = getFilteredData();
+        document.getElementById('visibleCount').textContent = filtered.length;
+        document.getElementById('totalCount').textContent = mcuData.length;
+
+        tableBody.innerHTML = '';
+        if (filtered.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-stoneDeep font-mono text-sm">Sin resultados para estos filtros.</td></tr>`;
+        } else {
+            filtered.forEach(item => {
+                const isChecked = watchedItems.includes(item.crono);
+                const row = document.createElement('tr');
+                row.className = `hover:bg-stone/20 transition-colors ${rowBorderClass(item.relevancia)} ${isChecked ? 'opacity-50' : ''}`;
+                row.innerHTML = `
+                    <td class="py-3 px-3 text-center">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleWatched(${item.crono})" class="bz-check">
+                    </td>
+                    <td class="py-3 px-3 text-center font-mono font-bold">#${item.crono}</td>
+                    <td class="py-3 px-4 font-bold ${isChecked ? 'line-through text-stoneDeep' : ''}">${item.titulo}</td>
+                    <td class="py-3 px-3 text-sm">${item.tipo}</td>
+                    <td class="py-3 px-3 text-xs text-stoneDeep">${item.universo}</td>
+                    <td class="py-3 px-4">
+                        <span class="bz-chip ${badgeClass(item.relevancia)}">${badgeIcon(item.relevancia)}${item.relevancia}</span>
+                    </td>
+                    <td class="py-3 px-4 text-xs max-w-xs leading-relaxed">${item.resumen}</td>
+                    <td class="py-3 px-3 text-center">
+                        <button onclick="openModal(${item.crono})" class="bz-icon-btn !w-9 !h-9 !shadow-none border-2">${ICON_ARROW}</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        cardsViewSection.innerHTML = '';
+        filtered.forEach(item => {
+            const isChecked = watchedItems.includes(item.crono);
+            const card = document.createElement('div');
+            card.className = `bz-card p-4 flex flex-col justify-between ${rowBorderClass(item.relevancia)} ${isChecked ? 'opacity-50' : ''}`;
+            card.innerHTML = `
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-mono text-xs font-bold">#${item.crono}</span>
+                        <span class="bz-chip ${badgeClass(item.relevancia)}">${badgeIcon(item.relevancia)}${item.relevancia}</span>
+                    </div>
+                    <h4 class="font-display text-base mb-1 ${isChecked ? 'line-through text-stoneDeep' : ''}">${item.titulo}</h4>
+                    <div class="flex gap-2 text-xs text-stoneDeep mb-3 font-mono">
+                        <span>${item.tipo}</span><span>&middot;</span><span>${item.universo}</span>
+                    </div>
+                    <p class="text-xs mb-4 leading-relaxed">${item.resumen}</p>
+                </div>
+                <div class="flex justify-between items-center pt-3 border-t-2 border-ink/10">
+                    <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleWatched(${item.crono})" class="bz-check">
+                        Visto
+                    </label>
+                    <button onclick="openModal(${item.crono})" class="font-mono text-xs font-bold underline decoration-2 underline-offset-4 flex items-center gap-1">
+                        Detalle ${ICON_ARROW}
+                    </button>
+                </div>
+            `;
+            cardsViewSection.appendChild(card);
+        });
+    }
+
+    function toggleWatched(cronoId) {
+        if (watchedItems.includes(cronoId)) {
+            watchedItems = watchedItems.filter(id => id !== cronoId);
+        } else {
+            watchedItems.push(cronoId);
+        }
+        localStorage.setItem('mcu_watched_items', JSON.stringify(watchedItems));
+        renderData();
+        updateCollectionCounts();
+    }
+
+    function updateCollectionCounts() {
+        const total = mcuData.length;
+        const obligatorias = mcuData.filter(i => i.relevancia === 'Obligatoria').length;
+        const recomendadas = mcuData.filter(i => i.relevancia === 'Recomendada').length;
+        const opcionales = mcuData.filter(i => i.relevancia === 'Opcional').length;
+        const legacy = mcuData.filter(i => /Fox|Sony|Defenders/.test(i.universo)).length;
+
+        document.getElementById('colTotal').textContent = `${total} títulos`;
+        document.getElementById('colObligatorias').textContent = `${obligatorias} títulos`;
+        document.getElementById('colRecomendadas').textContent = `${recomendadas} títulos`;
+        document.getElementById('colOpcionales').textContent = `${opcionales} títulos`;
+        document.getElementById('colLegacy').textContent = `${legacy} títulos`;
+
+        const watchedCount = watchedItems.length;
+        const pct = Math.round((watchedCount / total) * 100) || 0;
+        document.getElementById('colProgressPct').textContent = `${pct}%`;
+        document.getElementById('colProgressCount').textContent = `${watchedCount}/${total}`;
+
+        const bar = document.getElementById('colProgressBar');
+        bar.innerHTML = '';
+        const segments = 10;
+        const filledSegments = Math.round((pct / 100) * segments);
+        for (let i = 0; i < segments; i++) {
+            const seg = document.createElement('span');
+            if (i < filledSegments) seg.classList.add('filled');
+            bar.appendChild(seg);
+        }
+    }
+
+    function setCollectionFilter(relVal, uniVal) {
+        relevanceFilter.value = relVal;
+        universeFilter.value = uniVal;
+        searchInput.value = '';
+        typeFilter.value = 'ALL';
+        applyFilters();
+        document.getElementById('contentAnchor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function toggleFilterPanel() {
+        const panel = document.getElementById('filterPanel');
+        const btn = document.getElementById('filterToggleBtn');
+        panel.classList.toggle('hidden');
+        btn.classList.toggle('is-active');
+    }
+
+    function switchView() {
+        currentView = currentView === 'table' ? 'cards' : 'table';
+        const tableSection = document.getElementById('tableViewSection');
+        const cardsSection = document.getElementById('cardsViewSection');
+        const icon = document.getElementById('viewToggleIcon');
+        const btn = document.getElementById('viewToggleBtn');
+        if (currentView === 'table') {
+            tableSection.classList.remove('hidden');
+            cardsSection.classList.add('hidden');
+            icon.innerHTML = `<rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>`;
+            btn.classList.remove('is-active');
+        } else {
+            tableSection.classList.add('hidden');
+            cardsSection.classList.remove('hidden');
+            icon.innerHTML = `<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>`;
+            btn.classList.add('is-active');
+        }
+    }
+
+    function applyFilters() { renderData(); }
+
+    function resetFilters() {
+        searchInput.value = '';
+        relevanceFilter.value = 'ALL';
+        universeFilter.value = 'ALL';
+        typeFilter.value = 'ALL';
+        renderData();
+    }
+
+    function openModal(cronoId) {
+        const item = mcuData.find(i => i.crono === cronoId);
+        if (!item) return;
+        const modalContent = document.getElementById('modalContent');
+        modalContent.innerHTML = `
+            <div class="mb-4 pr-8">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="font-mono text-xs bz-border-thin rounded-md px-2 py-1">#${item.crono}</span>
+                    <span class="bz-chip ${badgeClass(item.relevancia)}">${badgeIcon(item.relevancia)}${item.relevancia}</span>
+                </div>
+                <h3 class="font-display text-2xl mb-1 uppercase">${item.titulo}</h3>
+                <p class="font-mono text-xs text-stoneDeep">${item.tipo} &middot; ${item.universo}</p>
+            </div>
+            <div class="space-y-4 text-sm">
+                <div class="bz-border-thin rounded-xl p-4">
+                    <h4 class="font-mono text-xs font-bold uppercase tracking-wide mb-1">Resumen</h4>
+                    <p class="leading-relaxed">${item.resumen}</p>
+                </div>
+                <div class="bz-border-thin rounded-xl p-4 bg-red/10">
+                    <h4 class="font-mono text-xs font-bold uppercase tracking-wide mb-1">Impacto en Avengers: Doomsday</h4>
+                    <p class="leading-relaxed">${item.detalle}</p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeModal()" class="bz-btn px-4 py-2 text-sm">Cerrar</button>
+            </div>
+        `;
+        document.getElementById('detailModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    function toggleCharts() {
+        const wrapper = document.getElementById('chartsWrapper');
+        const btn = document.getElementById('toggleChartsBtn');
+        if (wrapper.classList.contains('hidden')) {
+            wrapper.classList.remove('hidden');
+            btn.textContent = 'Ocultar';
+        } else {
+            wrapper.classList.add('hidden');
+            btn.textContent = 'Mostrar';
+        }
+    }
+
+    function exportToCSV() {
+        let csvContent = "﻿";
+        csvContent += '"Orden Cronologico","Título","Tipo","Fase / Universo","Relevancia para Doomsday","Resumen de Importancia"\n';
+        mcuData.forEach(item => {
+            const title = `"${item.titulo.replace(/"/g, '""')}"`;
+            const type = `"${item.tipo.replace(/"/g, '""')}"`;
+            const uni = `"${item.universo.replace(/"/g, '""')}"`;
+            const rel = `"${item.relevancia.replace(/"/g, '""')}"`;
+            const res = `"${item.resumen.replace(/"/g, '""')}"`;
+            csvContent += `${item.crono},${title},${type},${uni},${rel},${res}\n`;
+        });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "mcu_orden_doomsday_google_sheets.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function initCharts() {
+        const ctx1 = document.getElementById('relevanceChart').getContext('2d');
+        const obligatorias = mcuData.filter(i => i.relevancia === 'Obligatoria').length;
+        const recomendadas = mcuData.filter(i => i.relevancia === 'Recomendada').length;
+        const opcionales = mcuData.filter(i => i.relevancia === 'Opcional').length;
+
+        chartInstances.relevance = new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: ['Obligatorias', 'Recomendadas', 'Opcionales'],
+                datasets: [{
+                    data: [obligatorias, recomendadas, opcionales],
+                    backgroundColor: ['#E63946', '#3FD6FF', '#DCD6C6'],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#14120F', font: { size: 11, family: 'Work Sans', weight: '600' } } },
+                    tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} títulos` } }
+                }
+            }
+        });
+
+        const ctx2 = document.getElementById('universeChart').getContext('2d');
+        const universeCounts = {};
+        mcuData.forEach(item => {
+            const uniKey = item.universo.split('/')[0].trim();
+            universeCounts[uniKey] = (universeCounts[uniKey] || 0) + 1;
+        });
+
+        chartInstances.universe = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(universeCounts),
+                datasets: [{
+                    label: 'Cantidad',
+                    data: Object.values(universeCounts),
+                    backgroundColor: '#3FD6FF',
+                    borderColor: '#14120F',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#14120F', font: { size: 10, family: 'Work Sans' } }, grid: { display: false } },
+                    y: { ticks: { color: '#14120F', precision: 0 }, grid: { color: '#DCD6C6' } }
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>
